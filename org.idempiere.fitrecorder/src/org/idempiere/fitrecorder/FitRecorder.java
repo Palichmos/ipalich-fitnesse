@@ -205,7 +205,8 @@ public class FitRecorder implements ModelValidator {
 						|| colName.equals("AD_Client_ID")
 						|| colName.equals(table.getTableName() + "_ID")
 						|| colName.equals(PO.getUUIDColumnName(table.getTableName()))
-						|| column.getAD_Reference_ID() == DisplayType.Button)
+						|| column.getAD_Reference_ID() == DisplayType.Button
+						|| column.isVirtualColumn())
 						continue;
 					if (po.isActive() && colName.equals("IsActive"))
 						continue;
@@ -243,6 +244,8 @@ public class FitRecorder implements ModelValidator {
 					writeFile("\n");
 					writeFile("|*ProcessValue*|");
 					writeFile(pro.getValue() + "|");
+					writeFile("\n");
+					writeFile("|*RecordID*|" + pint.getRecord_ID() + "|");
 					MPInstancePara[] iparas = pint.getParameters();
 					for (MProcessPara para : pro.getParameters()) {
 						MPInstancePara ipara = null;
@@ -461,7 +464,7 @@ public class FitRecorder implements ModelValidator {
 			if (! ("AD_Org".equals(foreignTable) || "AD_User".equals(foreignTable) || "AD_Ref_List".equals(foreignTable))
 					&& fTable.getColumn("Value") != null) {
 				foreignColName = "Value";
-			} else if (fTable.getColumn("Name") != null) {
+			} else if (fTable.getColumn("Name") != null && !fTable.getColumn("Name").isVirtualColumn()) {
 				foreignColName = "Name";
 			} else if (fTable.getColumn("DocumentNo") != null) {
 				foreignColName = "DocumentNo";
@@ -486,35 +489,38 @@ public class FitRecorder implements ModelValidator {
 
 	private String resolveValue(PO po, MTable table, MColumn column) {
 		String value = null;
-		// resolve to identifier - search for value first, if not search for name - if not use the ID
-		String foreignTable = column.getReferenceTableName();
-		String foreignColName = null;
-		if ( ! ("AD_Language".equals(foreignTable) || "AD_EntityType".equals(foreignTable))) {
-			MTable fTable = MTable.get(Env.getCtx(), foreignTable);
-			// Hardcoded / do not check for Value on AD_Org, AD_User and AD_Ref_List, must use name for these two tables
-			if (! ("AD_Org".equals(foreignTable) || "AD_User".equals(foreignTable) || "AD_Ref_List".equals(foreignTable))
-					&& fTable.getColumn("Value") != null) {
-				foreignColName = "Value";
-			} else if (fTable.getColumn("Name") != null) {
-				foreignColName = "Name";
-			} else if (fTable.getColumn("DocumentNo") != null) {
-				foreignColName = "DocumentNo";
-			}
-		}
+// IP - Отключено из-за возникновения проблем с не уникальными значениями вторичных идентификаторов
+		
+//		// resolve to identifier - search for value first, if not search for name - if not use the ID
+//		String foreignTable = column.getReferenceTableName();
+//		String foreignColName = null;
+//		if ( ! ("AD_Language".equals(foreignTable) || "AD_EntityType".equals(foreignTable))) {
+//			MTable fTable = MTable.get(Env.getCtx(), foreignTable);
+//			// Hardcoded / do not check for Value on AD_Org, AD_User and AD_Ref_List, must use name for these two tables
+//			if (! ("AD_Org".equals(foreignTable) || "AD_User".equals(foreignTable) || "AD_Ref_List".equals(foreignTable))
+//					&& fTable.getColumn("Value") != null) {
+//				foreignColName = "Value";
+//			} else if (fTable.getColumn("Name") != null && !fTable.getColumn("Name").isVirtualColumn()) {
+//				foreignColName = "Name";
+//			} else if (fTable.getColumn("DocumentNo") != null) {
+//				foreignColName = "DocumentNo";
+//			}
+//		}
+//
+//		Object idO = po.get_Value(column.getColumnName());
+//		if (idO != null && foreignColName != null) {
+//			int id = (Integer) idO;
+//			StringBuilder select = new StringBuilder("SELECT ")
+//			.append(foreignColName).append(" FROM ")
+//			.append(foreignTable).append(" WHERE ")
+//			.append(foreignTable).append("_ID=?");
+//			String foreignValue = DB.getSQLValueStringEx(null, select.toString(), id);
+//			value = "@Ref=" + foreignTable + "[" + foreignColName + "='" + foreignValue + "']." + foreignTable + "_ID";
+//		} else {
+//			value = po.get_ValueAsString(column.getColumnName());
+//		}
 
-		Object idO = po.get_Value(column.getColumnName());
-		if (idO != null && foreignColName != null) {
-			int id = (Integer) idO;
-			StringBuilder select = new StringBuilder("SELECT ")
-			.append(foreignColName).append(" FROM ")
-			.append(foreignTable).append(" WHERE ")
-			.append(foreignTable).append("_ID=?");
-			String foreignValue = DB.getSQLValueStringEx(null, select.toString(), id);
-			value = "@Ref=" + foreignTable + "[" + foreignColName + "='" + foreignValue + "']." + foreignTable + "_ID";
-		} else {
-			value = po.get_ValueAsString(column.getColumnName());
-		}
-
+		value = po.get_ValueAsString(column.getColumnName());
 		return value;
 	}
 

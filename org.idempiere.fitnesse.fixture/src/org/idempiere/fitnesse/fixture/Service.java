@@ -232,17 +232,55 @@ public class Service {
 	{
 		//  Get Login Info
 		String loginInfo = null;
-		//  Verify existance of User/Client/Org/Role and User's acces to Client & Org
-		String sql = "SELECT u.Name || '@' || c.Name || '.' || o.Name AS Text "
-			+ "FROM AD_User u, AD_Client c, AD_Org o, AD_User_Roles ur "
-			+ "WHERE u.AD_User_ID=?"    //  #1
-			+ " AND c.AD_Client_ID=?"   //  #2
-			+ " AND o.AD_Org_ID=?"      //  #3
-			+ " AND ur.AD_Role_ID=?"    //  #4
-			+ " AND ur.AD_User_ID=u.AD_User_ID"
-			+ " AND (o.AD_Client_ID = 0 OR o.AD_Client_ID=c.AD_Client_ID)"
-			+ " AND c.AD_Client_ID IN (SELECT AD_Client_ID FROM AD_Role_OrgAccess ca WHERE ca.AD_Role_ID=ur.AD_Role_ID)"
-			+ " AND o.AD_Org_ID IN (SELECT AD_Org_ID FROM AD_Role_OrgAccess ca WHERE ca.AD_Role_ID=ur.AD_Role_ID)";
+		
+		//  Verify existance of User/Client/Org/Role and User's access to Client & Org
+		String sql = ""
+			+ "  SELECT u.Name || '@' || c.Name || '.' || o.Name AS Text "
+			+ "    FROM AD_User u "
+			+ "    JOIN AD_User_Roles ur ON ur.AD_User_ID = u.AD_User_ID "
+			+ "                         AND ur.IsActive = 'Y' "
+			+ "    JOIN AD_Role r ON r.AD_Role_ID = ur.AD_Role_ID "
+			+ "                  AND r.IsActive = 'Y', "
+			+ "    AD_Client c "
+			+ "    JOIN AD_Org o ON (o.AD_Client_ID = 0 OR o.AD_Client_ID = c.AD_Client_ID) "
+			+ "                 AND o.IsActive = 'Y' "
+			+ "   WHERE u.AD_User_ID = ? "	 // #1
+			+ "     AND c.AD_Client_ID = ? " // #2
+			+ "     AND o.AD_Org_ID = ? "	 // #3
+			+ "     AND r.AD_Role_ID = ? "	 // #4
+			+ "     AND u.IsActive = 'Y' "
+			+ "     AND c.AD_Client_ID IN (SELECT oa.AD_Client_ID "
+			+ "                              FROM AD_Role_OrgAccess oa "
+			+ "                             WHERE oa.AD_Role_ID = r.AD_Role_ID "
+			+ "                               AND oa.IsActive = 'Y' "
+			+ "                             UNION ALL "
+			+ "                            SELECT ua.AD_Client_ID "
+			+ "                              FROM AD_User_OrgAccess ua "
+			+ "                             WHERE ua.AD_User_ID = u.AD_User_ID "
+			+ "                               AND ua.IsActive = 'Y') "
+			+ "     AND CASE "
+			+ "          WHEN r.IsAccessAllOrgs = 'Y' "
+			+ "          THEN o.AD_Org_ID IN (SELECT ro.AD_Org_ID "
+			+ "                                 FROM AD_Role_OrgAccess ro "
+			+ "                                WHERE ro.AD_Role_ID = r.AD_Role_ID "
+			+ "                                  AND ro.IsActive = 'Y') "
+			+ "          WHEN r.IsAccessAllOrgs = 'N' "
+			+ "          THEN CASE "
+			+ "                WHEN r.IsUseUserOrgAccess = 'Y' "
+			+ "                THEN o.AD_Org_ID IN (SELECT uo.AD_Org_ID "
+			+ "                                       FROM AD_User_OrgAccess uo "
+			+ "                                      WHERE uo.AD_User_ID = u.AD_User_ID "
+			+ "                                        AND uo.IsActive = 'Y') "
+			+ "                WHEN r.IsUseUserOrgAccess = 'N' "
+			+ "                THEN o.AD_Org_ID IN (SELECT ro.AD_Org_ID "
+			+ "                                       FROM AD_Role_OrgAccess ro "
+			+ "                                      WHERE ro.AD_Role_ID = r.AD_Role_ID "
+			+ "                                        AND ro.IsActive = 'Y') "
+			+ "                ELSE FALSE "
+			+ "                 END "
+			+ "          ELSE FALSE "
+			+ "           END ";
+		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try

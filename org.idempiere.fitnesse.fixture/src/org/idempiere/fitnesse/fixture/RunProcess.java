@@ -27,8 +27,13 @@
 package org.idempiere.fitnesse.fixture;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -47,6 +52,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
 import org.compiere.util.Trx;
@@ -64,6 +70,8 @@ public class RunProcess extends TableFixture {
 	private volatile static Instance adempiereInstance = null;
 	
 	private static CLogger	log = CLogger.getCLogger(RunProcess.class);
+	
+	protected Collection<KeyNamePair> tselectionIDsMap = new ArrayList <KeyNamePair>();
 
 	@Override
 	protected void doStaticTable(int rows) {
@@ -124,7 +132,36 @@ public class RunProcess extends TableFixture {
 					}
 					return;
 				}
-			} else if (cell_title.equalsIgnoreCase("*Run*") || cell_title.equalsIgnoreCase("*Run*Error*")) {
+			} 
+			else if (cell_title.equalsIgnoreCase("*tselectionIDs*"))
+			{
+				String sqlTSelectionIDs = Env.parseContext(ctx, windowNo, cell_value.substring(5), false);
+
+				tselectionIDsMap.clear();
+
+				PreparedStatement pstmt = null;
+				ResultSet rs = null;
+
+				try
+				{
+					pstmt = DB.prepareStatement(sqlTSelectionIDs, null);
+					rs = pstmt.executeQuery();
+
+					while (rs.next())
+					{
+						tselectionIDsMap.add(new KeyNamePair(rs.getInt(1), null));
+					}
+				}
+				catch (SQLException e)
+				{
+					log.severe(e.getMessage());
+				}
+				finally
+				{
+					DB.close(rs, pstmt);
+				}
+			}
+			else if (cell_title.equalsIgnoreCase("*Run*") || cell_title.equalsIgnoreCase("*Run*Error*")) {
 				if (i != rows-1) {
 					exception(getCell(i, 1), new Exception("*Run* must be called in last row"));
 					return;
@@ -144,6 +181,12 @@ public class RunProcess extends TableFixture {
 				if (recordID > 0)
 					pInstance.setRecord_ID( recordID);
 				pInstance.saveEx();
+				
+				if (!tselectionIDsMap.isEmpty())
+				{
+					DB.createT_SelectionNew(pInstance.getAD_PInstance_ID(), tselectionIDsMap, null);
+				}
+				
 				if (docAction != null) {
 					if (docAction != null && docAction.length() > 0) {
 						// Requirements
