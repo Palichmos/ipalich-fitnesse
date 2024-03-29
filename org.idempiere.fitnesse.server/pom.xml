@@ -173,6 +173,12 @@
 									<artifactId>fitnesse</artifactId>
 									<version>20221102</version>
 								</artifactItem>
+								<!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+								<artifactItem>
+								    <groupId>io.netty</groupId>
+								    <artifactId>netty-all</artifactId>
+								    <version>4.1.85.Final</version>
+								</artifactItem>
 								<artifactItem>
 								    <groupId>io.netty</groupId>
 								    <artifactId>netty-buffer</artifactId>
