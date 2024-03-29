@@ -47,4 +47,8 @@ public class Instance {
 		return service.get();
 	} // getAdempiereService
 
+	public void dispose()
+	{
+		service.remove();
+	}
 } // AdempiereInstance

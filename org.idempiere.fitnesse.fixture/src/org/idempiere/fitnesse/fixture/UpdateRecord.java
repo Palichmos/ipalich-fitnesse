@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Properties;
 
+import org.adempiere.util.ServerContext;
 import org.compiere.model.MColumn;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
@@ -105,7 +106,9 @@ public class UpdateRecord extends TableFixture {
 					exception(getCell(i, 1), new Exception("*Where* must be defined in second row"));
 					return;
 				}
-				whereclause.append(cell_value);
+				// IP - добавлен парсинг контекста для поля WHERE
+				String parsedValue = Env.parseContext(ctx, windowNo, cell_value.toLowerCase(), false);
+				whereclause.append(parsedValue);
 			} else if (cell_title.equalsIgnoreCase("*Update*") || cell_title.equalsIgnoreCase("*Update*Error*")) {
 				isErrorExpected = "*Update*Error*".equalsIgnoreCase(cell_title);
 				msgerror = cell_value;
