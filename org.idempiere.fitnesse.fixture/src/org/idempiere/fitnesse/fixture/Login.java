@@ -33,6 +33,7 @@ import org.compiere.model.MSession;
 import org.compiere.model.MUser;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
+import org.compiere.util.Trx;
 
 import fitnesse.fixtures.TableFixture;
 
@@ -140,6 +141,10 @@ public class Login extends TableFixture {
 						} else {
 							wrong(rows-1, 0);
 							exception(getCell(rows-1, 1), new Exception(msg));
+							
+							Trx trx = Trx.get(trxName, false);							
+							trx.rollback();
+							trx.close();
 						}
 						
 					}
