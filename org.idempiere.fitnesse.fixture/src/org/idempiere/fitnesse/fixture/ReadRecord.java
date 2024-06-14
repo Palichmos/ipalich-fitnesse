@@ -111,10 +111,10 @@ public class ReadRecord extends TableFixture {
 				ResultSet rs = null;
 				try
 				{
-					pstmt = DB.prepareStatement(sql, trxName);
+					pstmt = DB.prepareStatement(sql, null);
 					rs = pstmt.executeQuery();
 					if (rs.next()) {
-						gpo = table.getPO(rs, trxName);
+						gpo = table.getPO(rs, null);
 						if (isErrorExpected) {
 							wrong(i,1);							
 						}

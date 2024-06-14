@@ -114,10 +114,10 @@ public class DeleteRecord extends TableFixture {
 				PreparedStatement pstmt = null;
 				ResultSet rs = null;
 				try {
-					pstmt = DB.prepareStatement(sql, trxName);//red1
+					pstmt = DB.prepareStatement(sql, null);//red1
 					rs = pstmt.executeQuery();
 					if (rs.next()) {
-						gpo = table.getPO(rs, trxName);//red1
+						gpo = table.getPO(rs, null);//red1
 					} else {
 						getCell(i, 1).addToBody("No record found: " + sql);
 						boolean ok = Util.evaluateError("No record found: ",cell_value, isErrorExpected);
@@ -140,7 +140,7 @@ public class DeleteRecord extends TableFixture {
 					}
 					
 					if (gpo != null) {
-						gpo.deleteEx(true, trxName);//red1
+						gpo.deleteEx(true, null);//red1
 					}
 							
 				} catch (Exception e) {

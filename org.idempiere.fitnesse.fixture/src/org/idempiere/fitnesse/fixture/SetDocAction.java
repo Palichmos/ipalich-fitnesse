@@ -97,10 +97,10 @@ public class SetDocAction extends TableFixture {
 					return;
 				}
 
-				Trx trx = Trx.get(trxName, true);
+				Trx trx = Trx.get(null, true);
 				//trx.setDisplayName(getClass().getName()+"_doStaticTable");
 
-				gpo = table.getPO(recordID, trxName);
+				gpo = table.getPO(recordID, null);
 				if (gpo == null) {
 					exception(getCell(i, 1), new Exception("No Record " + recordID + " in " + tableName));
 					return;
@@ -123,7 +123,7 @@ public class SetDocAction extends TableFixture {
 						exception(getCell(i, 1), new Exception("No Record " + recordID + " in " + tableName));
 						return;
 					}
-					if (!gpo.save(trxName)) {
+					if (!gpo.save()) {
 						exception(getCell(i, 1), new Exception("Cannot save before setDocAction: " + CLogger.retrieveErrorString("no log message")));
 						return;
 					}
@@ -140,7 +140,7 @@ public class SetDocAction extends TableFixture {
 				}
 
 				// close the trx
-				if (!gpo.save(trxName)) {
+				if (!gpo.save()) {
 					exception(getCell(i, 1), new Exception("Cannot save after setDocAction: " + CLogger.retrieveErrorString("no log message")));
 					return;
 				}
@@ -150,7 +150,7 @@ public class SetDocAction extends TableFixture {
 					return;
 				}
 
-				//red1				trx.close(); -- otherwise cannot retrieve to rollback
+				trx.close();
 				
 				// Now validate the expected status according to DocAction
 

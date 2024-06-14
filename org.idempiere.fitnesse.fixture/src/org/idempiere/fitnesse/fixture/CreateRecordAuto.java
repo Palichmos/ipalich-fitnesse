@@ -97,7 +97,7 @@ public class CreateRecordAuto extends TableFixture {
 					tableOK = false;
 				} else {
 					tableOK = true;
-					gpo = table.getPO(0, trxName); //red1
+					gpo = table.getPO(0, null); //red1
 				}
 		    	poinfo = POInfo.getPOInfo(ctx, table!=null ? table.getAD_Table_ID() : 0);
 			} else if (cell_title.equalsIgnoreCase("*Save*") || cell_title.equalsIgnoreCase("*Save*Error*")) {
@@ -115,7 +115,7 @@ public class CreateRecordAuto extends TableFixture {
 						wrong(i,1);
 				} else {
 					if (columnsOK) {
-						if (!gpo.save(trxName)) {//red1
+						if (!gpo.save()) {//red1
 							StringBuilder msg = new StringBuilder();
 							Exception e = (Exception) ctx.get("org.compiere.util.CLogger.lastException");
 							if (e != null)
@@ -152,11 +152,11 @@ public class CreateRecordAuto extends TableFixture {
 				if (tableOK) {
 					// create an array to pass to cell_title and cell_value from AD automatically
 					if (cell_title.isEmpty()){
-						List<MColumn> cols = getTableColumns(tableName,trxName);
+						List<MColumn> cols = getTableColumns(tableName, null);
 						for (MColumn col:cols){
 							cell_title = col.getColumnName();
 							try {
-								cell_value = getColumnValue(col, trxName);
+								cell_value = getColumnValue(col,  null);
 							} catch (SQLException e1) {
 								e1.printStackTrace();
 							}
@@ -165,14 +165,14 @@ public class CreateRecordAuto extends TableFixture {
 							columnName = cell_title;
 							int idxcol = gpo.get_ColumnIndex(columnName);
 							if (idxcol<0) continue;
-							columnsOK = doOriginalLoop(ctx, windowNo, trxName, gpo,
+							columnsOK = doOriginalLoop(ctx, windowNo, null, gpo,
 									columnName, columnsOK, isErrorExpected,
 									msgerror1, table, poinfo, i, cell_title,
 									cell_value, idxcol);
 						}
 					}
 					else {
-						columnsOK = doOriginalLoop(ctx, windowNo, trxName, gpo,
+						columnsOK = doOriginalLoop(ctx, windowNo, null, gpo,
 								cell_title, columnsOK, isErrorExpected,
 								msgerror1, table, poinfo, i, cell_title,
 								cell_value, gpo.get_ColumnIndex(cell_title));

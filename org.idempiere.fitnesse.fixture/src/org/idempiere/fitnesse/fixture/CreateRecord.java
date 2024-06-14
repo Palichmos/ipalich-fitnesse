@@ -94,7 +94,7 @@ public class CreateRecord extends TableFixture {
 					tableOK = false;
 				} else {
 					tableOK = true;
-					gpo = table.getPO(0, trxName);
+					gpo = table.getPO(0, null);
 				}
 		    	poinfo = POInfo.getPOInfo(ctx, table!=null ? table.getAD_Table_ID() : 0);
 			} else if (cell_title.equalsIgnoreCase("*Save*") || cell_title.equalsIgnoreCase("*Save*Error*")) {
@@ -112,7 +112,7 @@ public class CreateRecord extends TableFixture {
 						wrong(i,1);
 				} else {
 					if (columnsOK) {
-						if (!gpo.save(trxName)) {
+						if (!gpo.save()) {
 							StringBuilder msg = new StringBuilder();
 							Exception e = (Exception) ctx.get("org.compiere.util.CLogger.lastException");
 							if (e != null)
@@ -185,7 +185,7 @@ public class CreateRecord extends TableFixture {
 									// Evaluate the ID is from the actual client or system
 									String foreignTable = column.getReferenceTableName();
 									if (foreignTable != null) {
-										int foreignClient = DB.getSQLValueEx(trxName,
+										int foreignClient = DB.getSQLValueEx(null,
 												"SELECT AD_Client_ID FROM " + foreignTable + " WHERE " + foreignTable + "_ID=?",
 												intid);
 										if (foreignClient != 0 && foreignClient != Env.getAD_Client_ID(ctx)) {

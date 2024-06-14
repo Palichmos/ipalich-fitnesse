@@ -37,6 +37,7 @@ import org.compiere.model.MSystem;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Trx;
 
 import fit.Parse;
 
@@ -123,6 +124,15 @@ public class Util {
 				whereParsed = "(" + whereParsed + ") AND AD_Client_ID IN (0,"+Env.getAD_Client_ID(ctx)+")";
 			String columnname = cell_value.substring(pos_clsqb+2);
 			String newval = DB.getSQLValueStringEx(trxName, "SELECT " + columnname + " FROM " + tablename + " WHERE " + whereParsed);
+			
+			Trx trx = Trx.get(trxName, false);
+			
+			if (trx != null)
+			{
+				trx.commit();
+				trx.close();
+			}
+			
 			if (parse != null)
 				parse.addToBody("<hr/>" + newval);
 			if (log.isLoggable(Level.CONFIG)) log.config("Cell value " + cell_value + " evaluated to " + newval);

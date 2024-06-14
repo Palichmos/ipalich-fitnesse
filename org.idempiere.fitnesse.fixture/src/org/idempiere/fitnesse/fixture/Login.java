@@ -141,10 +141,6 @@ public class Login extends TableFixture {
 						} else {
 							wrong(rows-1, 0);
 							exception(getCell(rows-1, 1), new Exception(msg));
-							
-							Trx trx = Trx.get(trxName, false);							
-							trx.rollback();
-							trx.close();
 						}
 						
 					}

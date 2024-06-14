@@ -201,7 +201,7 @@ public class RunProcess extends TableFixture {
 						    	// get the PO for the tablename and record ID
 						    	MTable table = MTable.get(ctx, wf.getAD_Table_ID());
 						    	if (table != null) {
-							    	PO po = table.getPO(recordID, trxName);
+							    	PO po = table.getPO(recordID, null);
 							    	if (po != null) {
 							    		po.set_ValueOfColumn("DocAction", docAction);
 										po.saveEx();
@@ -213,7 +213,6 @@ public class RunProcess extends TableFixture {
 					}
 				}
 				ProcessInfo pi = new ProcessInfo (process.getName(), process.getAD_Process_ID());
-				pi.setTransactionName(trxName);
 				pi.setAD_User_ID(Env.getAD_User_ID(ctx));
 				pi.setAD_Client_ID(Env.getAD_Client_ID(ctx));
 				pi.setAD_PInstance_ID(pInstance.getAD_PInstance_ID());
@@ -244,7 +243,7 @@ public class RunProcess extends TableFixture {
 							if (wf.getWorkflowType().equals(MWorkflow.WORKFLOWTYPE_DocumentProcess)) {
 								MTable table = MTable.get(ctx, wf.getAD_Table_ID());
 						    	if (table != null) {
-							    	PO po = table.getPO(recordID, trxName);
+							    	PO po = table.getPO(recordID, null);
 							    	if (!docAction.equals(po.get_Value("DocStatus"))) {
 										getCell(i, 1).addToBody("<br>Expected " + docAction + "<br>Received " + po.get_Value("DocStatus"));
 										boolean ok = Util.evaluateError(Msg.parseTranslation(ctx, pi.getSummary()), msgerror1, isErrorExpected); 	
